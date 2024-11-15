@@ -28,14 +28,7 @@ class Program
 
         if (number.HasValue)
         {
-            string binFolder = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(pathPDF), "bin");
-            Directory.CreateDirectory(binFolder);
-            string binName = number.Value + ".bin";
-            string binResult = System.IO.Path.Combine(binFolder, binName);
-
-            File.WriteAllBytes(binResult, byteArray);
-
-            WriteMySql(number.Value, binResult);
+            WriteMySql(number.Value, byteArray);
         }
     }
 
@@ -76,7 +69,7 @@ class Program
         return null;
     }
 
-    static void WriteMySql(int number, string binPath)
+    static void WriteMySql(int number, byte[] fileData)
     {
         string connectionString = "server=localhost;user=root;password=root;database=files";
 
@@ -101,13 +94,13 @@ class Program
                 using (MySqlCommand command = new MySqlCommand(query, connection))
                 {
                     command.Parameters.AddWithValue("@Number", number);
-                    command.Parameters.AddWithValue("@Path", binPath);
+                    command.Parameters.AddWithValue("@Path", fileData);
                     command.ExecuteNonQuery();
                 }
             }
             catch (Exception ex)
             {
-                LogError(binPath, ex.ToString());
+                LogError(number.ToString(), ex.ToString());
             }
             finally
             {
